@@ -1,0 +1,499 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#12233b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mahals Billing">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<title>Mahals Furniture Billing</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f3f6fa;color:#17233b}
+.app{display:flex;min-height:100vh}.side{width:230px;background:#12233b;color:white;padding:22px 14px;position:fixed;top:0;bottom:0}.brand{font-size:20px;font-weight:700;padding:8px 10px 25px}.nav button{display:block;width:100%;border:0;background:transparent;color:white;text-align:left;padding:13px 14px;border-radius:8px;margin:4px 0;font-size:15px;cursor:pointer}.nav button:hover,.nav button.active{background:#28527e}
+.main{margin-left:230px;width:calc(100% - 230px);padding:28px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}.top h1{margin:0;font-size:28px}.cardrow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:white;border-radius:10px;padding:18px;box-shadow:0 1px 5px #0001}.num{font-size:25px;font-weight:700;margin-top:8px}
+.page{display:none}.page.show{display:block}.panel{background:white;border-radius:10px;padding:20px;box-shadow:0 1px 5px #0001;margin-top:18px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:15px}.field{margin-bottom:12px}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:5px}.field input,.field select,.field textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;font-size:14px}.btn{border:0;border-radius:6px;padding:10px 15px;cursor:pointer;font-weight:700}.primary{background:#1769e0;color:white}.secondary{background:#e8eef6;color:#17233b}.danger{background:#d33;color:#fff}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left}.table th{background:#eaf5fb}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.invoice-head{display:flex;justify-content:space-between;align-items:flex-start}.muted{color:#64748b}.right{text-align:right}
+@media(max-width:800px){.side{width:72px}.brand{font-size:0}.brand:after{content:"MF";font-size:20px}.nav button{font-size:0;text-align:center}.nav button:before{content:"•";font-size:24px}.main{margin-left:72px;width:calc(100% - 72px);padding:15px}.cardrow{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}}
+/* PRINTABLE INVOICE */
+#printArea{display:none}.invoice{--accent:#08669b;--invoice-font-size:12px;--invoice-padding:8mm;width:210mm;min-height:297mm;background:#fff;color:#111;margin:auto;padding:var(--invoice-padding);font-family:Arial,Helvetica,sans-serif;font-size:var(--invoice-font-size)}.tax-title{font-size:16px;margin-bottom:6px}.original{border:1px solid #888;padding:2px 5px;margin-left:6px;font-size:12px}.ibox{border:1px solid #222}.company{height:40mm;display:grid;grid-template-columns:35mm 1fr 65mm;padding:8mm 5mm;align-items:center}.logo{width:30mm;max-height:28mm;object-fit:contain}.companyname{font-size:17px;font-weight:700;color:var(--accent)}.companyname span{color:#111;font-weight:700}.companyright{font-size:12px;line-height:1.6}.billrow{display:grid;grid-template-columns:2fr 1fr;min-height:34mm}.billto{padding:5mm;border-right:1px solid #222}.invinfo{padding:5mm;display:grid;grid-template-columns:1fr 1fr;gap:12px}.invinfo b{display:block;margin-bottom:7px}.invtable{width:100%;border-collapse:collapse}.invtable th{background:#cfeaf7}.invtable th,.invtable td{border:1px solid #222;padding:7px}.items{height:90mm;vertical-align:top}.totalrow{background:#cfeaf7;font-weight:700}.taxsum{margin-top:3mm}.taxsum th{background:#cfeaf7}.words{padding:4mm;border:1px solid #222;border-bottom:0}.bottom{display:grid;grid-template-columns:1fr 1.25fr 1fr;border:1px solid #222;min-height:35mm}.bottom>div{padding:4mm;border-right:1px solid #222}.bottom>div:last-child{border-right:0}.sign{text-align:center;display:flex;align-items:center;justify-content:center;font-weight:700}.small{font-size:11px;line-height:1.45}
+@page{size:A4 portrait;margin:0}
+@media print{html,body{margin:0!important;padding:0!important;width:210mm!important;height:297mm!important;background:#fff!important}body>*:not(#printArea){display:none!important}#printArea{display:block!important;width:210mm!important;height:297mm!important;margin:0!important;padding:0!important;overflow:hidden!important}.invoice{box-sizing:border-box!important;margin:0!important;padding:var(--invoice-padding)!important;width:210mm!important;height:297mm!important;min-height:297mm!important;max-height:297mm!important;overflow:hidden!important}.invoice *{box-sizing:border-box}#printBtn{display:none!important}}
+
+@media (max-width:600px){
+ body{font-size:14px;padding-bottom:76px;overflow-x:hidden}
+ .app{display:block;min-height:100vh}
+ .side{position:fixed;z-index:1000;left:0;right:0;top:auto;bottom:0;width:100%;height:68px;padding:6px 4px;background:#12233b;border-top:1px solid #27496c;box-shadow:0 -3px 14px #0003}
+ .brand{display:none}
+ .nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;height:56px;align-items:center}
+ .nav::-webkit-scrollbar{display:none}
+ .nav button{flex:0 0 auto;width:auto;min-width:74px;height:52px;margin:0;padding:7px 8px;border-radius:8px;text-align:center;font-size:10px;line-height:1.15;white-space:normal}
+ .nav button:before{display:none}
+ .nav button.active{background:#28527e}
+ .main{margin:0;width:100%;padding:12px 10px 24px}
+ .top{display:block;margin-bottom:12px}.top h1{font-size:22px;margin-bottom:5px}.top>div{font-size:12px}
+ .cardrow{grid-template-columns:1fr 1fr;gap:9px}.card{padding:13px;border-radius:9px}.num{font-size:20px}
+ .panel{padding:13px;margin-top:12px;border-radius:9px}
+ .grid2{grid-template-columns:1fr;gap:0}
+ .field input,.field select,.field textarea{font-size:16px;min-height:44px}
+ .btn{min-height:44px;padding:10px 13px;font-size:14px}
+ .actions{gap:7px}
+ .table{display:block;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch}
+ .table th,.table td{padding:9px 8px}
+ .toolbar{display:block}.toolbar>*{width:100%;margin-bottom:8px}
+ .modal{padding:10px!important}
+ .modal .modalbox{width:100%!important;max-height:92vh;overflow:auto;padding:15px!important}
+ .invoice{transform-origin:top left}
+}
+@media (min-width:601px) and (max-width:800px){
+ .side{width:72px}.main{margin-left:72px;width:calc(100% - 72px)}
+}
+
+</style>
+
+<style>
+.modal{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;z-index:50}
+.modal.show{display:flex}.modalbox{background:#fff;width:min(520px,92vw);border-radius:12px;padding:22px;box-shadow:0 15px 50px #0004}
+.rowbtn{display:flex;gap:7px;flex-wrap:wrap}.mini{padding:6px 9px;font-size:12px}
+.badge{display:inline-block;padding:3px 8px;border-radius:20px;background:#e8eef6;font-size:12px}
+.toolbar{display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+select.inputlike{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;font-size:14px;background:#fff}
+@media(max-width:800px){.toolbar{align-items:stretch}.toolbar>*{width:100%}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side">
+<div class="brand">MAHALS FURNITURE</div>
+<div class="nav">
+<button class="active" data-page="dashboard">Dashboard</button>
+<button data-page="invoice">Create Invoice</button>
+<button data-page="invoices">Invoices</button>
+<button data-page="customers">Customers</button>
+<button data-page="products">Products / Inventory</button>
+<button data-page="payments">Payments</button>
+<button data-page="reports">Reports</button>
+<button data-page="template">Invoice Template</button>
+</div>
+</aside>
+<main class="main">
+<div class="top"><h1 id="title">Billing & Invoicing</h1><div>GSTIN: 24BVLPM0520N1ZI</div></div>
+
+<section id="dashboard" class="page show">
+<div class="cardrow">
+<div class="card">Invoices<div class="num" id="cInvoices">0</div></div>
+<div class="card">Sales<div class="num" id="cSales">₹ 0</div></div>
+<div class="card">Pending<div class="num" id="cPending">₹ 0</div></div>
+<div class="card">Customers<div class="num" id="cCustomers">0</div></div><div class="card">Received<div class="num" id="cReceived">₹ 0</div></div><div class="card">Outstanding<div class="num" id="cOutstanding">₹ 0</div></div>
+</div>
+<div class="panel"><h2>Mahals Furniture</h2><p>38-39, Rajiv Nagar-1, Makrand Desai Road, Vasna, Vadodara, 390015</p><p>Mobile: 8866163046 &nbsp; | &nbsp; Email: mahals.furniture@yahoo.com</p><button class="btn primary" data-page="invoice">Create New Invoice</button></div>
+</section>
+
+<section id="invoice" class="page">
+<div class="panel">
+<h2>Create Invoice</h2>
+<div class="grid2">
+<div>
+<div class="field"><label>Customer</label>
+<select id="customerSelect" class="inputlike"><option value="">-- Select saved customer --</option><option value="__new__">+ New customer</option></select>
+</div>
+<div class="field"><label>Customer name</label><input id="custName" placeholder="Customer / Company name"></div>
+<div class="field"><label>Customer address</label><textarea id="custAddress" rows="3" placeholder="Billing address"></textarea></div>
+<div class="field"><label>Customer GSTIN</label><div style="display:flex;gap:8px;align-items:flex-start"><input id="custGstin" placeholder="Optional" style="flex:1"><button class="btn secondary" type="button" id="verifyInvoiceGstin">Verify GSTIN</button></div><div id="invoiceGstinResult" style="margin-top:5px;font-size:12px"></div></div>
+</div>
+<div>
+<div class="field"><label>Invoice number</label><input id="invNo" readonly></div>
+<div class="field"><label>Invoice date</label><input id="invDate" type="date"></div>
+<div class="field"><label>Place of supply</label><select id="place" class="inputlike"><option>Gujarat</option><option>Andhra Pradesh</option><option>Arunachal Pradesh</option><option>Assam</option><option>Bihar</option><option>Chhattisgarh</option><option>Goa</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option><option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option><option>Odisha</option><option>Punjab</option><option>Rajasthan</option><option>Sikkim</option><option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option><option>Andaman and Nicobar Islands</option><option>Chandigarh</option><option>Dadra and Nagar Haveli and Daman and Diu</option><option>Delhi</option><option>Jammu and Kashmir</option><option>Ladakh</option><option>Lakshadweep</option><option>Puducherry</option></select><div class="muted" style="margin-top:4px">Gujarat = CGST 9% + SGST 9%; any other state/UT = IGST 18%.</div></div>
+</div>
+</div>
+<h3>Item</h3>
+<div class="grid2">
+<div class="field"><label>Product</label><select id="item" class="inputlike"></select></div>
+<div class="field"><label>HSN/SAC</label><input id="hsn" value="4409"></div>
+<div class="field"><label>Quantity</label><input id="qty" type="number" min="1" value="1"></div>
+<div class="field"><label>Price / item (₹)</label><input id="price" type="number" min="0" value="0"></div>
+</div>
+<div class="actions"><button class="btn primary" id="preview">Preview Bill</button><button class="btn secondary" id="saveInvoice">Save Invoice</button><button class="btn primary" id="savePdfAfterSave">Save Invoice + PDF</button></div>
+</div>
+</section>
+
+<section id="invoices" class="page"><div class="panel"><div class="toolbar"><h2 style="margin:0">Invoices</h2><input id="invoiceSearch" placeholder="Search invoice or customer" style="max-width:320px;padding:10px;border:1px solid #cbd5e1;border-radius:6px"></div><table class="table"><thead><tr><th>No.</th><th>Customer</th><th>Date</th><th>Total</th><th>Status</th><th>Action</th></tr></thead><tbody id="invoiceRows"></tbody></table></div></section>
+<section id="customers" class="page">
+<div class="panel">
+<div class="toolbar"><h2 style="margin:0">Customers</h2><button class="btn primary" id="addCustomer">+ Add Customer</button></div>
+<table class="table"><thead><tr><th>Customer</th><th>GSTIN</th><th>Address</th><th>Actions</th></tr></thead><tbody id="customerRows"></tbody></table>
+</div></section>
+<section id="products" class="page">
+<div class="panel">
+<div class="toolbar"><h2 style="margin:0">Products / Inventory</h2><button class="btn primary" id="addProduct">+ Add Product</button></div>
+<table class="table"><thead><tr><th>Product</th><th>HSN</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead><tbody id="productRows"></tbody></table>
+</div></section>
+<section id="payments" class="page"><div class="panel"><div class="toolbar"><div><h2 style="margin:0">Payment Tracking</h2><p class="muted">Record payments against saved invoices and see outstanding balances.</p></div><button class="btn secondary" id="paymentRefresh">Refresh</button></div><div style="overflow:auto"><table class="table"><thead><tr><th>Invoice</th><th>Customer</th><th>Date</th><th>Total</th><th>Received</th><th>Balance</th><th>Status</th><th>Action</th></tr></thead><tbody id="paymentRows"></tbody></table></div></div><div class="panel"><h2>Customer Ledger</h2><div class="toolbar"><select id="ledgerCustomer" class="inputlike" style="max-width:420px"><option value="">-- Select customer --</option></select><button class="btn primary" id="ledgerPrint">Print Statement</button></div><div id="ledgerBox"></div></div></section>
+
+<section id="template" class="page">
+<div class="panel">
+<div class="toolbar"><div><h2 style="margin:0">Invoice Template</h2><p class="muted" style="margin:5px 0 0">Change the text, logo and basic appearance of your printed bill. These settings are saved on this computer.</p></div>
+<div class="actions"><button class="btn secondary" id="templateReset">Reset Template</button><button class="btn primary" id="templateSave">Save Template</button></div></div>
+<div class="grid2">
+<div>
+<h3>Company & invoice text</h3>
+<div class="field"><label>Invoice title</label><input id="tplTitle"></div>
+<div class="field"><label>Copy label</label><input id="tplOriginal"></div>
+<div class="field"><label>Company name</label><input id="tplCompany"></div>
+<div class="field"><label>Company address</label><textarea id="tplAddress" rows="3"></textarea></div>
+<div class="grid2"><div class="field"><label>GSTIN</label><input id="tplGstin"></div><div class="field"><label>Mobile</label><input id="tplMobile"></div></div>
+<div class="field"><label>Email</label><input id="tplEmail"></div>
+<div class="field"><label>Bill To heading</label><input id="tplBillTo"></div>
+<div class="field"><label>Invoice number heading</label><input id="tplInvNoLabel"></div>
+<div class="field"><label>Invoice date heading</label><input id="tplInvDateLabel"></div>
+<div class="field"><label>Amount-in-words heading</label><input id="tplWordsLabel"></div>
+<div class="field"><label>Authorised signatory text</label><input id="tplSignatory"></div>
+</div>
+<div>
+<h3>Bank & terms</h3>
+<div class="field"><label>Bank details (one line per line)</label><textarea id="tplBank" rows="6"></textarea></div>
+<div class="field"><label>Terms & Conditions (one item per line)</label><textarea id="tplTerms" rows="6"></textarea></div>
+<h3>Appearance</h3>
+<div class="grid2">
+<div class="field"><label>Accent colour</label><input id="tplAccent" type="color"></div>
+<div class="field"><label>Invoice font</label><select id="tplFont" class="inputlike">
+<option value="Arial,Helvetica,sans-serif">Arial</option><option value="Calibri,Arial,sans-serif">Calibri</option><option value="Georgia,serif">Georgia</option><option value="Verdana,Arial,sans-serif">Verdana</option><option value="Tahoma,Arial,sans-serif">Tahoma</option>
+</select></div>
+</div>
+<div class="grid2"><div class="field"><label>Invoice font size (px)</label><input id="tplFontSize" type="number" min="9" max="18" step="0.5"></div><div class="field"><label>Page padding (mm)</label><input id="tplPadding" type="number" min="2" max="18" step="1"></div></div>
+<div class="field"><label>Logo</label><input id="tplLogo" type="file" accept="image/png,image/jpeg,image/webp"></div>
+<div class="actions"><button class="btn secondary" id="tplRemoveLogo">Remove Logo</button></div>
+<h3>Show / hide sections</h3>
+<div class="actions">
+<label><input type="checkbox" id="tplShowBank"> Bank details</label>
+<label><input type="checkbox" id="tplShowTerms"> Terms & conditions</label>
+<label><input type="checkbox" id="tplShowSignature"> Authorised signatory</label>
+<label><input type="checkbox" id="tplShowTaxSummary"> HSN/SAC tax summary</label>
+</div>
+</div></div>
+<div class="panel" style="margin-top:15px;background:#f8fafc">
+<h3 style="margin-top:0">Advanced CSS (optional)</h3>
+<p class="muted">If you know CSS, you can add styling here. Leave it blank if you don't need it. Changes affect the printed invoice only.</p>
+<textarea id="tplCss" rows="8" style="width:100%;font-family:Consolas,monospace;font-size:13px;border:1px solid #cbd5e1;border-radius:6px;padding:10px"></textarea>
+</div>
+<div class="actions" style="margin-top:15px"><button class="btn primary" id="templatePreview">Preview Current Template</button><button class="btn secondary" id="templateSave2">Save Template</button></div>
+</div></section>
+
+<section id="reports" class="page"><div class="panel"><h2>Sales & GST Reports</h2><div class="grid2"><div class="field"><label>From date</label><input id="reportFrom" type="date"></div><div class="field"><label>To date</label><input id="reportTo" type="date"></div></div><div class="actions"><button class="btn primary" id="runReport">Run Report</button><button class="btn secondary" id="printReport">Print Report</button></div><div id="reportSummary" style="margin-top:15px"></div><div style="overflow:auto;margin-top:15px"><table class="table"><thead><tr><th>Date</th><th>Invoice</th><th>Customer</th><th>Taxable</th><th>CGST</th><th>SGST</th><th>Total</th><th>Received</th><th>Balance</th></tr></thead><tbody id="reportRows"></tbody></table></div></div><div class="panel"><h2>Backup</h2><p>GSTIN verification checks the GSTIN format/check digit inside the app. For live registration status, the official GST taxpayer search is opened from the Verify button. Everything is stored locally in this browser and works offline. An automatic local backup snapshot is updated whenever your data is saved.</p><div class="actions"><button class="btn secondary" id="exportData">Export Backup</button><button class="btn secondary" id="downloadAutoBackup">Download Latest Auto Backup</button><label class="btn secondary" style="display:inline-flex;align-items:center;cursor:pointer">Import Backup<input id="importData" type="file" accept=".json" style="display:none"></label></div><p class="muted">Keep exported backups outside the billing folder as an extra safety copy.</p></div></section>
+</main>
+</div>
+
+<div id="printArea">
+<div class="invoice">
+<div class="tax-title"><span id="pTitle">TAX INVOICE</span> <span class="original" id="pOriginal">ORIGINAL</span></div>
+<div class="ibox">
+<div class="company">
+<div><img class="logo" src="data:image/png;base64,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"></div>
+<div><div class="companyname" id="pCompany">Mahals Furniture</div><div><b>Address:</b> <span id="pCompanyAddress">38-39, RAJIV NAGAR-1, VASANA ROAD, Vadodara, Gujarat, Vadodara, 390015</span></div></div>
+<div class="companyright"><b>GSTIN:</b> <span id="pCompanyGstin">24BVLPM0520N1ZI</span><br><b>Mobile:</b> <span id="pCompanyMobile">8866163046</span><br><b>Email:</b> <span id="pCompanyEmail">mahals.furniture@yahoo.com</span></div>
+</div>
+<div class="billrow">
+<div class="billto"><b id="pBillTo">BILL TO</b><br><b id="pCust">CUSTOMER</b><br>Address: <span id="pAddr"></span><br>GSTIN: <span id="pGstin">-</span><br>Place of Supply: <span id="pPlace">Gujarat</span></div>
+<div class="invinfo"><div><b id="pInvNoLabel">Invoice No.</b><span id="pNo"></span></div><div><b id="pInvDateLabel">Invoice Date</b><span id="pDate"></span></div></div>
+</div>
+<table class="invtable"><thead><tr><th>No.</th><th>Items</th><th>HSN</th><th>Quantity</th><th>PRICE/ITEM (₹)</th><th>Total</th></tr></thead>
+<tbody><tr><td>1</td><td id="pItem">Universal Gusset</td><td id="pHsn">4409</td><td id="pQty">1 SET</td><td class="right" id="pPrice">0</td><td class="right" id="pSub">0</td></tr>
+<tr><td class="items"></td><td class="items"><br><br><br><br><br><br><span id="pCgstLabel">CGST @9%</span><br><br><span id="pSgstLabel">SGST @9%</span><br><br><span id="pIgstLabel">IGST @18%</span></td><td class="items">-<br><br><br>-</td><td class="items">-<br><br><br>-</td><td class="items right">-<br><br><br>-</td><td class="items right"><br><br><span id="pCgst">₹ 0</span><br><br><span id="pSgst">₹ 0</span><br><br><span id="pIgst">₹ 0</span></td></tr>
+<tr class="totalrow"><td></td><td class="right">TOTAL</td><td></td><td id="pTotalQty">1</td><td></td><td class="right" id="pTotal">₹ 0</td></tr></tbody></table>
+<table class="invtable taxsum"><thead><tr><th>HSN/SAC</th><th>Taxable Value</th><th>CGST</th><th>SGST</th><th>IGST</th><th>Total Tax Amount</th></tr></thead><tbody><tr><td id="tHsn">4409</td><td class="right" id="tTaxable">0</td><td class="right" id="tCgst">0</td><td class="right" id="tSgst">0</td><td class="right" id="tIgst">0</td><td class="right" id="tTax">₹ 0</td></tr><tr><td><b>Total</b></td><td class="right" id="tTotalTaxable">0</td><td class="right" id="tTotalCgst">0</td><td class="right" id="tTotalSgst">0</td><td class="right" id="tTotalIgst">0</td><td class="right" id="tTotalTax">₹ 0</td></tr></tbody></table>
+<div class="words"><b id="pWordsLabel">Total Amount (in words)</b><br><span id="pWords">Zero Rupees</span></div>
+<div class="bottom"><div class="small" id="bankBox"><b id="pBankHeading">Bank Details</b><div id="pBank"></div></div><div class="small" id="termsBox"><b id="pTermsHeading">Terms and Conditions</b><div id="pTerms"></div></div><div class="sign" id="signBox"><span id="pSignatory">Authorised Signatory For<br>Mahals Furniture</span></div></div>
+</div>
+</div>
+<button class="btn primary" id="printBtn" style="position:fixed;right:20px;bottom:20px">Print / Save PDF</button>
+</div>
+
+
+<div class="modal" id="customerModal"><div class="modalbox">
+<h2 id="customerModalTitle">Add Customer</h2>
+<div class="field"><label>Name / Company</label><input id="mCustName"></div>
+<div class="field"><label>Address</label><textarea id="mCustAddress" rows="3"></textarea></div>
+<div class="field"><label>GSTIN</label><div style="display:flex;gap:8px"><input id="mCustGstin" style="flex:1" maxlength="15" placeholder="15-character GSTIN"><button class="btn secondary" id="verifyCustomerGstin" type="button">Verify GSTIN</button></div><div id="gstVerifyResult" class="muted" style="margin-top:6px"></div></div>
+<div class="actions"><button class="btn primary" id="saveCustomer">Save Customer</button><button class="btn secondary" id="closeCustomer">Cancel</button></div>
+</div></div>
+<div class="modal" id="productModal"><div class="modalbox">
+<h2 id="productModalTitle">Add Product</h2>
+<div class="field"><label>Product name</label><input id="mProdName"></div>
+<div class="grid2"><div class="field"><label>HSN/SAC</label><input id="mProdHsn" value="4409"></div><div class="field"><label>Price / item (₹)</label><input id="mProdPrice" type="number" min="0" value="0"></div></div>
+<div class="field"><label>Stock</label><input id="mProdStock" type="number" min="0" value="0"></div>
+<div class="actions"><button class="btn primary" id="saveProduct">Save Product</button><button class="btn secondary" id="closeProduct">Cancel</button></div>
+</div></div>
+
+<style id="customTemplateCSS"></style>
+<script>
+(function(){
+const KEY="mahals_billing_v2";
+const DEFAULT_PRODUCTS=[
+ {id:"p1",name:"Universal Gusset",hsn:"4409",price:0,stock:0},
+ {id:"p2",name:"Gusset Boxes",hsn:"4409",price:0,stock:0},
+ {id:"p3",name:"Adjustable Gusset Boxes",hsn:"4409",price:0,stock:0},
+ {id:"p4",name:"Collapsing Board Wooden Strips",hsn:"4409",price:0,stock:0}
+];
+const DEFAULT_TEMPLATE={
+ title:"TAX INVOICE",original:"ORIGINAL",company:"Mahals Furniture",
+ address:"38-39, RAJIV NAGAR-1, VASANA ROAD, Vadodara, Gujarat, Vadodara, 390015",
+ gstin:"24BVLPM0520N1ZI",mobile:"8866163046",email:"mahals.furniture@yahoo.com",
+ billTo:"BILL TO",invNoLabel:"Invoice No.",invDateLabel:"Invoice Date",wordsLabel:"Total Amount (in words)",
+ bank:"Name: Mahals Furniture\nIFSC Code: HDFC0009359\nAccount No: 50200074662748\nBank: HDFC Bank, DIWALIPURA ROAD BRANCH",
+ terms:"1. Goods once sold will not be taken back or exchanged\n2. Subject to Vadodara jurisdiction only\n3. E & O.E.",
+ signatory:"Authorised Signatory For\nMahals Furniture",
+ accent:"#08669b",font:"Arial,Helvetica,sans-serif",fontSize:12,padding:8,
+ showBank:true,showTerms:true,showSignature:true,showTaxSummary:true,logo:"",css:""
+};
+let db;
+try{
+ db=JSON.parse(localStorage.getItem(KEY)||"");
+}catch(e){db=null}
+if(!db || typeof db!=="object") db={invoices:[],customers:[],products:DEFAULT_PRODUCTS};
+if(!Array.isArray(db.invoices)) db.invoices=[];
+if(!Array.isArray(db.customers)) db.customers=[];
+if(!Array.isArray(db.products) || !db.products.length) db.products=DEFAULT_PRODUCTS;
+db.invoices.forEach(x=>{if(typeof x.paidAmount!=="number")x.paidAmount=Number(x.paid||0)||0;if(!Array.isArray(x.payments))x.payments=[];x.status=x.paidAmount<=0?"Unpaid":(x.paidAmount>=Number(x.total||0)?"Paid":"Partially Paid");});
+if(!db.template || typeof db.template!=="object") db.template={...DEFAULT_TEMPLATE}; else db.template={...DEFAULT_TEMPLATE,...db.template};
+function $(id){return document.getElementById(id)}
+function money(n){return "₹ "+Number(n||0).toLocaleString("en-IN",{maximumFractionDigits:2})}
+function saveDB(){localStorage.setItem(KEY,JSON.stringify(db));try{localStorage.setItem(KEY+"_AUTO_BACKUP",JSON.stringify({savedAt:new Date().toISOString(),db:db}))}catch(e){}}
+function nextNo(){return "MF/2026-27/"+String(db.invoices.length+1).padStart(4,"0")}
+function dateNow(){return new Date().toISOString().slice(0,10)}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function show(id){
+ document.querySelectorAll(".page").forEach(x=>x.classList.remove("show"));
+ const p=$(id);if(p)p.classList.add("show");
+ document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===id));
+ const names={dashboard:"Billing & Invoicing",invoice:"Create Invoice",invoices:"Invoices",customers:"Customers",products:"Products / Inventory",payments:"Payments",reports:"Reports & Backup",template:"Invoice Template"};
+ $("title").textContent=names[id]||"Mahals Furniture"; render();
+}
+document.addEventListener("click",e=>{
+ const b=e.target.closest("[data-page]");
+ if(b){e.preventDefault();show(b.dataset.page)}
+});
+function renderCustomers(){
+ $("customerRows").innerHTML=db.customers.map((x,i)=>`<tr><td>${esc(x.name)}</td><td>${esc(x.gstin||"-")}</td><td>${esc(x.address||"-")}</td><td><div class="rowbtn"><button class="btn secondary mini" data-edit-customer="${i}">Edit</button><button class="btn secondary mini" data-open-ledger="${i}">Ledger</button><button class="btn danger mini" data-delete-customer="${i}">Delete</button></div></td></tr>`).join("")||'<tr><td colspan="4">No customers yet. Click + Add Customer.</td></tr>';
+ const sel=$("customerSelect"), current=sel.value;
+ sel.innerHTML='<option value="">-- Select saved customer --</option>'+db.customers.map((x,i)=>`<option value="${i}">${esc(x.name)}</option>`).join("")+'<option value="__new__">+ New customer</option>';
+ if(current!=="" && [...sel.options].some(o=>o.value===current)) sel.value=current;
+}
+function renderProducts(){
+ $("productRows").innerHTML=db.products.map((x,i)=>`<tr><td>${esc(x.name)}</td><td>${esc(x.hsn)}</td><td>${money(x.price)}</td><td><span class="badge">${Number(x.stock||0)}</span></td><td><div class="rowbtn"><button class="btn secondary mini" data-edit-product="${i}">Edit</button><button class="btn danger mini" data-delete-product="${i}">Delete</button></div></td></tr>`).join("");
+ const sel=$("item"), current=sel.value;
+ sel.innerHTML=db.products.map((x,i)=>`<option value="${i}">${esc(x.name)}</option>`).join("")+'<option value="__custom__">Custom Product</option>';
+ if(current && [...sel.options].some(o=>o.value===current)) sel.value=current; else if(db.products.length) sel.value="0";
+}
+function bindEditHandlers(){
+ const cr=$("customerRows"), pr=$("productRows");
+ if(cr && !cr.dataset.bound){cr.dataset.bound="1";cr.addEventListener("click",function(e){
+   const b=e.target.closest("button"); if(!b)return;
+   if(b.dataset.editCustomer!==undefined){e.preventDefault();window.editCustomer(Number(b.dataset.editCustomer));}
+   else if(b.dataset.openLedger!==undefined){e.preventDefault();window.openLedger(Number(b.dataset.openLedger));}
+   else if(b.dataset.deleteCustomer!==undefined){e.preventDefault();window.deleteCustomer(Number(b.dataset.deleteCustomer));}
+ });}
+ if(pr && !pr.dataset.bound){pr.dataset.bound="1";pr.addEventListener("click",function(e){
+   const b=e.target.closest("button"); if(!b)return;
+   if(b.dataset.editProduct!==undefined){e.preventDefault();window.editProduct(Number(b.dataset.editProduct));}
+   else if(b.dataset.deleteProduct!==undefined){e.preventDefault();window.deleteProduct(Number(b.dataset.deleteProduct));}
+ });}
+}
+function render(){
+ applyTemplate();
+ $("cInvoices").textContent=db.invoices.length;
+ $("cCustomers").textContent=db.customers.length;
+ const sales=db.invoices.reduce((a,x)=>a+Number(x.total||0),0);
+ const received=db.invoices.reduce((a,x)=>a+Number(x.paidAmount||0),0);
+ const outstanding=Math.max(0,sales-received);
+ $("cSales").textContent=money(sales);$("cReceived").textContent=money(received);$("cOutstanding").textContent=money(outstanding);
+ $("cPending").textContent=money(outstanding);
+ const q=(($("invoiceSearch")?.value)||"").toLowerCase();
+ const rows=db.invoices.map((x,i)=>({x,i})).filter(o=>!q||String(o.x.no).toLowerCase().includes(q)||String(o.x.customer).toLowerCase().includes(q));
+ $("invoiceRows").innerHTML=rows.map(o=>{const x=o.x,i=o.i;return `<tr><td>${esc(x.no)}</td><td>${esc(x.customer)}</td><td>${esc(x.date)}</td><td>${money(x.total)}</td><td><span class="badge">${esc(x.status||"Unpaid")}</span></td><td><div class="rowbtn"><button class="btn secondary mini" onclick="window.openInvoice(${i})">View / Print</button><button class="btn secondary mini" onclick="window.recordPayment(${i})">Payment</button><button class="btn secondary mini" onclick="window.renameInvoice(${i})">Rename No.</button><button class="btn danger mini" onclick="window.deleteInvoice(${i})">Delete</button></div></td></tr>`}).join("")||'<tr><td colspan="6">No invoices found.</td></tr>';
+ renderCustomers();renderProducts();bindEditHandlers();renderPayments();renderLedgerSelect();renderReport();
+}
+
+
+function renderPayments(){const el=$("paymentRows");if(!el)return;el.innerHTML=db.invoices.map((x,i)=>{const paid=Number(x.paidAmount||0),bal=Math.max(0,Number(x.total||0)-paid);return `<tr><td>${esc(x.no)}</td><td>${esc(x.customer)}</td><td>${esc(x.date)}</td><td>${money(x.total)}</td><td>${money(paid)}</td><td>${money(bal)}</td><td><span class="badge">${esc(x.status||"Unpaid")}</span></td><td><button class="btn primary mini" onclick="window.recordPayment(${i})">Record Payment</button></td></tr>`}).join("")||'<tr><td colspan="8">No invoices yet.</td></tr>';}
+function renderLedgerSelect(){const el=$("ledgerCustomer");if(!el)return;const cur=el.value;el.innerHTML='<option value="">-- Select customer --</option>'+db.customers.map((c,i)=>`<option value="${i}">${esc(c.name)}</option>`).join("");if([...el.options].some(o=>o.value===cur))el.value=cur;renderLedger();}
+function renderLedger(){const el=$("ledgerBox"),sel=$("ledgerCustomer");if(!el||!sel||sel.value===""){if(el)el.innerHTML='<p class="muted">Select a customer to view the ledger.</p>';return}const c=db.customers[Number(sel.value)];if(!c){el.innerHTML='';return}const invs=db.invoices.filter(x=>String(x.customer).toLowerCase()===String(c.name).toLowerCase()).sort((a,b)=>String(a.date).localeCompare(String(b.date)));let bal=0,total=0,paid=0;const rows=invs.map(x=>{const p=Number(x.paidAmount||0),b=Number(x.total||0)-p;total+=Number(x.total||0);paid+=p;bal+=b;return `<tr><td>${esc(x.date)}</td><td>${esc(x.no)}</td><td>${money(x.total)}</td><td>${money(p)}</td><td>${money(Math.max(0,b))}</td><td>${esc(x.status||"Unpaid")}</td></tr>`}).join("");el.innerHTML=`<p><b>${esc(c.name)}</b>${c.gstin?" · GSTIN: "+esc(c.gstin):""}</p><div class="cardrow"><div class="card">Billed<div class="num">${money(total)}</div></div><div class="card">Received<div class="num">${money(paid)}</div></div><div class="card">Outstanding<div class="num">${money(Math.max(0,total-paid))}</div></div></div><div style="overflow:auto;margin-top:15px"><table class="table"><thead><tr><th>Date</th><th>Invoice</th><th>Billed</th><th>Received</th><th>Balance</th><th>Status</th></tr></thead><tbody>${rows||'<tr><td colspan="6">No invoices for this customer.</td></tr>'}</tbody></table></div>`;}
+function renderReport(){const el=$("reportRows");if(!el)return;const from=$("reportFrom")?.value||"",to=$("reportTo")?.value||"";const arr=db.invoices.filter(x=>(!from||x.date>=from)&&(!to||x.date<=to));let taxable=0,cgst=0,sgst=0,igst=0,total=0,received=0;arr.forEach(x=>{taxable+=Number(x.sub||0);cgst+=Number(x.cg||0);sgst+=Number(x.sg||0);igst+=Number(x.igst||0);total+=Number(x.total||0);received+=Number(x.paidAmount||0)});$("reportSummary").innerHTML=`<div class="cardrow"><div class="card">Invoices<div class="num">${arr.length}</div></div><div class="card">Taxable<div class="num">${money(taxable)}</div></div><div class="card">CGST<div class="num">${money(cgst)}</div></div><div class="card">SGST<div class="num">${money(sgst)}</div></div><div class="card">IGST<div class="num">${money(igst)}</div></div><div class="card">Total<div class="num">${money(total)}</div></div><div class="card">Outstanding<div class="num">${money(Math.max(0,total-received))}</div></div></div>`;el.innerHTML=arr.map(x=>`<tr><td>${esc(x.date)}</td><td>${esc(x.no)}</td><td>${esc(x.customer)}</td><td>${money(x.sub)}</td><td>${money(x.cg)}</td><td>${money(x.sg)}</td><td>${money(x.igst||0)}</td><td>${money(x.total)}</td><td>${money(x.paidAmount)}</td><td>${money(Math.max(0,Number(x.total||0)-Number(x.paidAmount||0)))}</td></tr>`).join("")||'<tr><td colspan="10">No invoices in this date range.</td></tr>';}
+window.recordPayment=function(i){const x=db.invoices[i];if(!x)return;const balance=Math.max(0,Number(x.total||0)-Number(x.paidAmount||0));if(balance<=0){alert("This invoice is already fully paid.");return}const raw=prompt("Amount received (maximum "+money(balance)+"):",String(balance));if(raw===null)return;const amt=Number(raw);if(!Number.isFinite(amt)||amt<=0||amt>balance){alert("Enter a valid payment amount.");return}const method=prompt("Payment method (Cash / UPI / Bank / Cheque):","Bank");if(method===null)return;x.paidAmount=Number(x.paidAmount||0)+amt;x.payments=x.payments||[];x.payments.push({date:dateNow(),amount:amt,method:method.trim()||"Other"});x.status=x.paidAmount>=Number(x.total||0)?"Paid":"Partially Paid";saveDB();render();alert("Payment recorded for "+x.no+". Remaining balance: "+money(Math.max(0,Number(x.total)-x.paidAmount)));};
+window.openLedger=function(i){show("payments");setTimeout(()=>{$("ledgerCustomer").value=String(i);renderLedger();},0)};
+function lineBreakHtml(text){return esc(text||"").replace(/\r?\n/g,"<br>");}
+function applyTemplate(){
+ const t=db.template||DEFAULT_TEMPLATE;
+ $("pTitle").textContent=t.title||"TAX INVOICE";$("pOriginal").textContent=t.original||"ORIGINAL";
+ $("pCompany").textContent=t.company||"Mahals Furniture";$("pCompanyAddress").textContent=t.address||"";
+ $("pCompanyGstin").textContent=t.gstin||"";$("pCompanyMobile").textContent=t.mobile||"";$("pCompanyEmail").textContent=t.email||"";
+ $("pBillTo").textContent=t.billTo||"BILL TO";$("pInvNoLabel").textContent=t.invNoLabel||"Invoice No.";$("pInvDateLabel").textContent=t.invDateLabel||"Invoice Date";
+ $("pWordsLabel").textContent=t.wordsLabel||"Total Amount (in words)";$("pBank").innerHTML=lineBreakHtml(t.bank);$("pTerms").innerHTML=lineBreakHtml(t.terms);$("pSignatory").innerHTML=lineBreakHtml(t.signatory);
+ $("bankBox").style.display=t.showBank?"block":"none";$("termsBox").style.display=t.showTerms?"block":"none";$("signBox").style.display=t.showSignature?"flex":"none";
+ document.querySelector(".taxsum").style.display=t.showTaxSummary?"table":"none";
+ const inv=document.querySelector(".invoice");inv.style.setProperty("--accent",t.accent||"#08669b");inv.style.setProperty("--invoice-font-size",(Number(t.fontSize)||12)+"px");inv.style.setProperty("--invoice-padding",(Number(t.padding)||8)+"mm");inv.style.fontFamily=t.font||"Arial,Helvetica,sans-serif";
+ $("customTemplateCSS").textContent=t.css||"";
+ const logo=document.querySelector(".logo");if(logo){if(t.logo){logo.src=t.logo;logo.style.display="block";}else{logo.style.display="block";}}
+}
+function loadTemplateEditor(){
+ const t=db.template,set=(id,v)=>{const el=$(id);if(el)el.value=v??""};
+ set("tplTitle",t.title);set("tplOriginal",t.original);set("tplCompany",t.company);set("tplAddress",t.address);set("tplGstin",t.gstin);set("tplMobile",t.mobile);set("tplEmail",t.email);
+ set("tplBillTo",t.billTo);set("tplInvNoLabel",t.invNoLabel);set("tplInvDateLabel",t.invDateLabel);set("tplWordsLabel",t.wordsLabel);set("tplSignatory",t.signatory);set("tplBank",t.bank);set("tplTerms",t.terms);
+ set("tplAccent",t.accent||"#08669b");set("tplFont",t.font||"Arial,Helvetica,sans-serif");set("tplFontSize",t.fontSize||12);set("tplPadding",t.padding||8);set("tplCss",t.css||"");
+ $("tplShowBank").checked=!!t.showBank;$("tplShowTerms").checked=!!t.showTerms;$("tplShowSignature").checked=!!t.showSignature;$("tplShowTaxSummary").checked=!!t.showTaxSummary;
+}
+function readTemplateEditor(){
+ const t={...db.template},get=id=>$(id)?.value??"";
+ t.title=get("tplTitle");t.original=get("tplOriginal");t.company=get("tplCompany");t.address=get("tplAddress");t.gstin=get("tplGstin");t.mobile=get("tplMobile");t.email=get("tplEmail");
+ t.billTo=get("tplBillTo");t.invNoLabel=get("tplInvNoLabel");t.invDateLabel=get("tplInvDateLabel");t.wordsLabel=get("tplWordsLabel");t.signatory=get("tplSignatory");t.bank=get("tplBank");t.terms=get("tplTerms");
+ t.accent=get("tplAccent")||"#08669b";t.font=get("tplFont")||"Arial,Helvetica,sans-serif";t.fontSize=Math.max(9,Math.min(18,Number(get("tplFontSize"))||12));t.padding=Math.max(2,Math.min(18,Number(get("tplPadding"))||8));t.css=get("tplCss");
+ t.showBank=$("tplShowBank").checked;t.showTerms=$("tplShowTerms").checked;t.showSignature=$("tplShowSignature").checked;t.showTaxSummary=$("tplShowTaxSummary").checked;return t;
+}
+function saveTemplateFromEditor(){db.template=readTemplateEditor();saveDB();applyTemplate();alert("Invoice template saved.");}
+$("templateSave").onclick=saveTemplateFromEditor;$("templateSave2").onclick=saveTemplateFromEditor;
+$("templatePreview").onclick=()=>{db.template=readTemplateEditor();applyTemplate();fillPreview();$("printArea").style.display="block";window.scrollTo(0,0)};
+$("templateReset").onclick=()=>{if(!confirm("Reset the invoice template to the original Mahals Furniture design?"))return;db.template={...DEFAULT_TEMPLATE};saveDB();loadTemplateEditor();applyTemplate();alert("Template reset.");};
+$("tplRemoveLogo").onclick=()=>{db.template.logo="";saveDB();loadTemplateEditor();applyTemplate();};
+$("tplLogo").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{db.template.logo=r.result;saveDB();applyTemplate();alert("Logo updated.");};r.readAsDataURL(f);};
+
+let editingCustomerIndex=-1;
+let editingProductIndex=-1;
+function closeModalsOnBackdrop(e){if(e.target.classList.contains("modal"))e.target.classList.remove("show");}
+document.addEventListener("click",closeModalsOnBackdrop);
+function normalizeGstin(v){return String(v||"").trim().toUpperCase().replace(/\s+/g,"")}
+function gstinFormatCheck(g){
+ g=normalizeGstin(g);
+ if(!/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/.test(g)) return {ok:false,message:"Invalid GSTIN format."};
+ const chars="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"; let factor=1,sum=0;
+ for(let i=0;i<14;i++){let code=chars.indexOf(g[i]); let add=code*factor; sum+=Math.floor(add/36)+(add%36); factor=factor===1?2:1;}
+ const check=(36-(sum%36))%36; const expected=chars[check];
+ return expected===g[14]?{ok:true,message:"GSTIN format and check digit are valid."}:{ok:false,message:"GSTIN check digit is invalid."};
+}
+function showGstinVerification(g){
+ const el=$("gstVerifyResult"); if(!el)return; const r=gstinFormatCheck(g);
+ el.textContent=r.message; el.style.fontWeight="600";
+ el.style.color=r.ok?"#166534":"#b91c1c"; return r.ok;
+}
+function selectCustomer(i){
+ const c=db.customers[i]; if(!c)return;
+ $("customerSelect").value=String(i); $("custName").value=c.name; $("custAddress").value=c.address||""; $("custGstin").value=c.gstin||"";
+}
+function selectProduct(i){
+ const p=db.products[i]; if(!p)return;
+ $("item").value=String(i); $("hsn").value=p.hsn; $("price").value=p.price;
+}
+$("customerSelect").onchange=function(){
+ if(this.value==="__new__"){this.value=""; $("customerModal").classList.add("show"); return}
+ if(this.value!=="") selectCustomer(Number(this.value));
+};
+$("item").onchange=function(){
+ if(this.value==="__custom__"){ $("hsn").value=""; $("price").value="0"; return; }
+ selectProduct(Number(this.value));
+};
+$("verifyInvoiceGstin")?.addEventListener("click",()=>{const g=normalizeGstin($("custGstin").value);$("custGstin").value=g;const r=gstinFormatCheck(g);const el=$("invoiceGstinResult");if(el){el.textContent=r.message;el.style.fontWeight="600";el.style.color=r.ok?"#166534":"#b91c1c";}if(r.ok && confirm("The GSTIN passes the format/check-digit test. Open the official GST taxpayer search to verify its current registration status?")){navigator.clipboard?.writeText(g).catch(()=>{});window.open("https://services.gst.gov.in/services/quicklinks/searchtxp","_blank");}});
+function resetCustomerModal(){editingCustomerIndex=-1;$("customerModalTitle").textContent="Add Customer";$("saveCustomer").textContent="Save Customer";$("mCustName").value="";$("mCustAddress").value="";$("mCustGstin").value="";$("gstVerifyResult").textContent="";$("gstVerifyResult").style.color="";}
+$("addCustomer").onclick=()=>{resetCustomerModal();$("customerModal").classList.add("show");$("mCustName").focus()};
+$("closeCustomer").onclick=()=>{$("customerModal").classList.remove("show");};
+$("verifyCustomerGstin").onclick=()=>{const g=normalizeGstin($("mCustGstin").value);$("mCustGstin").value=g;const ok=showGstinVerification(g);if(ok && confirm("The GSTIN passes the format/check-digit test. Open the official GST taxpayer search to verify its current registration status?")){navigator.clipboard?.writeText(g).catch(()=>{});window.open("https://services.gst.gov.in/services/quicklinks/searchtxp","_blank");}};
+$("mCustGstin").addEventListener("input",()=>{if($("gstVerifyResult"))$("gstVerifyResult").textContent="";});
+$("saveCustomer").onclick=()=>{
+ const name=$("mCustName").value.trim(); if(!name){alert("Enter customer name.");return}
+ const gstin=normalizeGstin($("mCustGstin").value);
+ if(gstin && !gstinFormatCheck(gstin).ok){alert("Please correct the GSTIN before saving.");return}
+ const obj={name,address:$("mCustAddress").value.trim(),gstin};
+ let savedIndex;
+ if(editingCustomerIndex>=0){savedIndex=editingCustomerIndex;db.customers[editingCustomerIndex]={...db.customers[editingCustomerIndex],...obj};}else{db.customers.push(obj);savedIndex=db.customers.length-1;}
+ saveDB(); render(); selectCustomer(savedIndex); $("customerModal").classList.remove("show"); resetCustomerModal();
+};
+window.editCustomer=i=>{const c=db.customers[i];if(!c)return;editingCustomerIndex=i;$("customerModalTitle").textContent="Edit Customer";$("saveCustomer").textContent="Update Customer";$("mCustName").value=c.name||"";$("mCustAddress").value=c.address||"";$("mCustGstin").value=c.gstin||"";$("gstVerifyResult").textContent="";$("customerModal").classList.add("show");};
+window.deleteCustomer=i=>{if(confirm("Delete this customer?")){db.customers.splice(i,1);saveDB();render()}};
+function resetProductModal(){editingProductIndex=-1;$("productModalTitle").textContent="Add Product";$("saveProduct").textContent="Save Product";$("mProdName").value="";$("mProdHsn").value="4409";$("mProdPrice").value="0";$("mProdStock").value="0";}
+$("addProduct").onclick=()=>{resetProductModal();$("productModal").classList.add("show");$("mProdName").focus()};
+$("closeProduct").onclick=()=>{$("productModal").classList.remove("show");};
+$("saveProduct").onclick=()=>{
+ const name=$("mProdName").value.trim(); if(!name){alert("Enter product name.");return}
+ const obj={name,hsn:$("mProdHsn").value.trim()||"4409",price:Number($("mProdPrice").value)||0,stock:Number($("mProdStock").value)||0};
+ let savedIndex;
+ if(editingProductIndex>=0){savedIndex=editingProductIndex;const old=db.products[editingProductIndex];db.products[editingProductIndex]={...old,...obj};}else{obj.id="p"+Date.now();db.products.push(obj);savedIndex=db.products.length-1;}
+ saveDB();render();selectProduct(savedIndex);$("productModal").classList.remove("show");resetProductModal();
+};
+window.editProduct=i=>{const p=db.products[i];if(!p)return;editingProductIndex=i;$("productModalTitle").textContent="Edit Product";$("saveProduct").textContent="Update Product";$("mProdName").value=p.name||"";$("mProdHsn").value=p.hsn||"4409";$("mProdPrice").value=Number(p.price||0);$("mProdStock").value=Number(p.stock||0);$("productModal").classList.add("show");};
+window.useProduct=i=>{show("invoice");selectProduct(i)};
+window.deleteProduct=i=>{if(db.products.length<=1){alert("Keep at least one product.");return} if(confirm("Delete this product?")){db.products.splice(i,1);saveDB();render()}};
+function values(){
+ const qty=Number($("qty").value)||0, price=Number($("price").value)||0, sub=qty*price;
+ const place=$("place").value.trim()||"Gujarat";
+ const interstate=place.toLowerCase()!=="gujarat";
+ const cg=interstate?0:sub*.09, sg=interstate?0:sub*.09, igst=interstate?sub*.18:0;
+ return {customer:$("custName").value.trim()||"CUSTOMER",address:$("custAddress").value.trim(),gstin:$("custGstin").value.trim(),place,no:$("invNo").value,date:$("invDate").value,item:$("item").value==="__custom__"?$("item").selectedOptions[0].textContent:db.products[Number($("item").value)]?.name||"Custom Product",hsn:$("hsn").value.trim(),qty,price,sub,cg,sg,igst,total:sub+cg+sg+igst,productIndex:$("item").value==="__custom__"?-1:Number($("item").value)};
+}
+function words(n){
+ n=Math.round(n); if(n===0)return "Zero Rupees";
+ const ones=["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"], tens=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+ function under(x){if(x<20)return ones[x];if(x<100)return tens[Math.floor(x/10)]+(x%10?" "+ones[x%10]:"");return ones[Math.floor(x/100)]+" Hundred"+(x%100?" "+under(x%100):"")}
+ let s=""; if(n>=10000000){s+=under(Math.floor(n/10000000))+" Crore ";n%=10000000} if(n>=100000){s+=under(Math.floor(n/100000))+" Lakh ";n%=100000} if(n>=1000){s+=under(Math.floor(n/1000))+" Thousand ";n%=1000} if(n)s+=under(n); return s.trim()+" Rupees";
+}
+function fillPreview(){
+ const v=values(), interstate=v.place.toLowerCase()!=="gujarat";
+ $("pCust").textContent=v.customer.toUpperCase();$("pAddr").textContent=v.address;$("pGstin").textContent=v.gstin||"-";$("pPlace").textContent=v.place;
+ $("pNo").textContent=v.no;$("pDate").textContent=v.date.split("-").reverse().join("/");$("pItem").textContent=v.item;$("pHsn").textContent=v.hsn;$("pQty").textContent=v.qty+" SET";$("pPrice").textContent=v.price.toLocaleString("en-IN");$("pSub").textContent=v.sub.toLocaleString("en-IN");
+ $("pCgstLabel").textContent=interstate?"":"CGST @9%";$("pSgstLabel").textContent=interstate?"":"SGST @9%";$("pIgstLabel").textContent=interstate?"IGST @18%":"";
+ $("pCgst").textContent=interstate?"":money(v.cg);$("pSgst").textContent=interstate?"":money(v.sg);$("pIgst").textContent=interstate?money(v.igst):"";
+ $("pTotalQty").textContent=v.qty;$("pTotal").textContent=money(v.total);
+ $("tHsn").textContent=v.hsn;$("tTaxable").textContent=v.sub.toLocaleString("en-IN");$("tCgst").textContent=interstate?"-":v.cg.toLocaleString("en-IN");$("tSgst").textContent=interstate?"-":v.sg.toLocaleString("en-IN");$("tIgst").textContent=interstate?v.igst.toLocaleString("en-IN"):"-";$("tTax").textContent=money(v.cg+v.sg+v.igst);
+ $("tTotalTaxable").textContent=v.sub.toLocaleString("en-IN");$("tTotalCgst").textContent=interstate?"-":v.cg.toLocaleString("en-IN");$("tTotalSgst").textContent=interstate?"-":v.sg.toLocaleString("en-IN");$("tTotalIgst").textContent=interstate?v.igst.toLocaleString("en-IN"):"-";$("tTotalTax").textContent=money(v.cg+v.sg+v.igst);$("pWords").textContent=words(v.total);
+}
+$("preview").onclick=()=>{fillPreview();$("printArea").style.display="block";window.scrollTo(0,0)};
+$("printBtn").onclick=()=>window.print();
+function saveCurrentInvoice(andPrint=false){
+ const v=values();
+ if(v.qty<=0 || v.price<0){alert("Enter a valid quantity and price.");return false}
+ if(!v.no.trim()){alert("Enter an invoice number.");return false}
+ db.invoices.push({...v,status:"Unpaid",paidAmount:0,payments:[]});
+ const existing=db.customers.findIndex(c=>c.name.toLowerCase()===v.customer.toLowerCase());
+ if(existing<0) db.customers.push({name:v.customer,address:v.address,gstin:v.gstin});
+ if(v.productIndex>=0 && db.products[v.productIndex]) db.products[v.productIndex].stock=Math.max(0,Number(db.products[v.productIndex].stock||0)-v.qty);
+ saveDB(); render(); fillPreview(); $("printArea").style.display="block";
+ if(andPrint) setTimeout(()=>window.print(),250);
+ alert("Invoice saved: "+v.no+(andPrint ? "\\nPrint dialog will open. Choose “Save as PDF” and save it to your Invoices folder." : ""));
+ return true;
+}
+$("saveInvoice").onclick=()=>saveCurrentInvoice(false);
+$("savePdfAfterSave").onclick=()=>saveCurrentInvoice(true);
+window.renameInvoice=function(i){
+ const inv=db.invoices[i]; if(!inv)return;
+ const n=prompt("Enter the new invoice number:",inv.no);
+ if(n===null)return;
+ const no=n.trim(); if(!no){alert("Invoice number cannot be empty.");return}
+ if(db.invoices.some((x,j)=>j!==i && x.no===no)){alert("That invoice number is already in use.");return}
+ inv.no=no; saveDB(); render(); alert("Invoice number changed to "+no);
+};
+window.deleteInvoice=function(i){
+ const inv=db.invoices[i]; if(!inv)return;
+ if(!confirm("Delete invoice "+inv.no+"?\\n\\nThe saved invoice record will be removed from the app."))return;
+ if(inv.productIndex>=0 && db.products[inv.productIndex]) db.products[inv.productIndex].stock=Number(db.products[inv.productIndex].stock||0)+Number(inv.qty||0);db.invoices.splice(i,1);saveDB();render();
+}; 
+window.openInvoice=function(i){
+ const x=db.invoices[i];
+ $("custName").value=x.customer;$("custAddress").value=x.address;$("custGstin").value=x.gstin;$("place").value=x.place;
+ $("invNo").value=x.no;$("invDate").value=x.date;$("hsn").value=x.hsn;$("qty").value=x.qty;$("price").value=x.price;
+ const idx=db.products.findIndex(p=>p.name===x.item); $("item").value=idx>=0?String(idx):"__custom__";
+ show("invoice");fillPreview();$("printArea").style.display="block";
+};
+$("exportData").onclick=()=>{
+ const blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="Mahals-Furniture-Backup.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+};
+$("importData").onchange=e=>{
+ const f=e.target.files[0]; if(!f)return;
+ const r=new FileReader(); r.onload=()=>{try{const x=JSON.parse(r.result);if(!x.invoices||!x.customers||!x.products)throw 0;db=x;saveDB();render();alert("Backup restored successfully.")}catch(_){alert("This backup file is not valid.")}};r.readAsText(f);e.target.value="";
+};
+$("invoiceSearch")?.addEventListener("input",render);$("ledgerCustomer")?.addEventListener("change",renderLedger);$("paymentRefresh")?.addEventListener("click",render);$("runReport")?.addEventListener("click",renderReport);$("reportFrom")?.addEventListener("change",renderReport);$("reportTo")?.addEventListener("change",renderReport);$("ledgerPrint")?.addEventListener("click",()=>{const old=document.title;document.title="Customer Ledger";window.print();document.title=old});$("printReport")?.addEventListener("click",()=>{const old=document.title;document.title="Mahals Furniture Sales Report";window.print();document.title=old});$("downloadAutoBackup")?.addEventListener("click",()=>{const raw=localStorage.getItem(KEY+"_AUTO_BACKUP");if(!raw){alert("No automatic backup is available yet.");return}const blob=new Blob([raw],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="Mahals-Furniture-Auto-Backup.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)});
+loadTemplateEditor();applyTemplate();$("invNo").value=nextNo();$("invDate").value=dateNow();render();
+
+})();
+</script>
+</html>
